@@ -385,6 +385,51 @@ jobs:
 - Automate testing
 - Document your modules and roles
 
+## Testing Infrastructure Changes
+
+Infrastructure code deserves the same testing rigor as application code. A Terraform misconfiguration can take down production just as surely as a code bug — arguably faster, and with a wider blast radius.
+
+**Validate before every apply:**
+
+```bash
+terraform fmt -check -recursive   # Formatting
+terraform validate                # Syntax and internal consistency
+```
+
+**Static analysis for security issues** with tools like `tfsec` or `checkov`:
+
+```bash
+checkov -d terraform/ --framework terraform
+```
+
+This catches open security groups, unencrypted storage, and overly permissive IAM policies before they exist. For Ansible, use `--check` mode (dry run) plus `--diff` to preview exactly what would change, and `ansible-lint` to catch playbook anti-patterns in CI.
+
+For deeper confidence, tools like Terratest let you write automated tests that spin up real infrastructure, assert on its behavior, and tear it down. Reserve this for critical modules — it's slower and costs real money — but for the VPC module everything depends on, it's worth it.
+
+## Drift Detection and Remediation
+
+Infrastructure drifts. Someone makes a manual change in the console during an incident, forgets to codify it, and now your Terraform state no longer matches reality. The next `apply` either reverts the emergency fix or fails confusingly.
+
+Detect drift on a schedule:
+
+```bash
+terraform plan -detailed-exitcode
+# Exit 0 = no changes, 2 = drift detected
+```
+
+Run this nightly in CI and alert on non-zero exits. When drift appears, decide deliberately: either import the manual change into code (if it was a legitimate fix) or re-apply to restore the declared state (if it wasn't). The worst option is ignoring it — drift compounds, and eventually nobody knows what production actually runs. This is the same operational discipline we apply to servers in the [Linux VPS guide](/blog/linux-vps-hardening-production-ready): if it isn't tracked, it isn't managed.
+
+## Secrets in Infrastructure Code
+
+The most common IaC mistake is committing secrets. A database password in `terraform.tfvars` pushed to a public repo is a breach announcement. The rules are non-negotiable:
+
+- **Never** commit `.tfvars` files containing secrets — add them to `.gitignore`
+- Pass secrets via environment variables (`TF_VAR_db_password`) or a secrets manager
+- Use Ansible Vault or SOPS for encrypted variables in playbooks
+- Scan your repo for leaked secrets with `gitleaks` or `trufflehog` in CI
+
+If a secret ever lands in git history, treat it as compromised — rotate it immediately. Deleting the commit doesn't help; the history is cloned and cached in places you can't reach.
+
 ## Conclusion
 
 Infrastructure as Code transforms operations from manual toil to automated, repeatable processes. Terraform provisions, Ansible configures, and together they enable infrastructure that's versioned, reviewable, and reliable.

@@ -232,6 +232,90 @@ sudo systemctl --failed
 last -20
 ```
 
+## Step 9: Backup Strategy (The Step Everyone Skips)
+
+Hardening protects the server, but nothing protects against a bad `rm -rf` or a failed disk. Set up automated backups before the server carries anything you care about. The rule of thumb is 3-2-1: three copies, two different media, one off-site.
+
+For most VPS workloads, a simple cron job syncing to object storage covers the essentials:
+
+```bash
+# Install rclone for object storage sync
+sudo apt install rclone
+
+# Configure a remote (S3, B2, etc.)
+rclone config
+
+# Nightly backup of critical directories
+cat > /etc/cron.daily/backup << 'EOF'
+#!/bin/bash
+rclone sync /etc remote:vps-backup/etc --quiet
+rclone sync /home remote:vps-backup/home --quiet
+EOF
+chmod +x /etc/cron.daily/backup
+```
+
+Test your backups by restoring a file before you need it. An untested backup is a hope, not a backup.
+
+## Step 10: Log Management
+
+Logs fill disks faster than most people expect. A busy web server can generate gigabytes per week, and a full disk takes down services in the worst way. Configure log rotation and set a retention policy:
+
+```bash
+# journald: cap total size
+sudo mkdir -p /etc/systemd/journald.conf.d
+sudo tee /etc/systemd/journald.conf.d/limits.conf << EOF
+[Journal]
+SystemMaxUse=500M
+MaxRetentionSec=2week
+EOF
+sudo systemctl restart systemd-journald
+```
+
+`logrotate` handles most application logs by default, but verify your app logs are covered in `/etc/logrotate.d/`. For anything security-sensitive, forward logs off-box — an attacker who compromises the server will delete local logs to cover their tracks, which connects directly to the monitoring practices in our [validator operations guide](/blog/running-blockchain-validator-nodes-production).
+
+## Step 11: Memory and OOM Protection
+
+VPS instances often come with limited RAM and no swap. When memory runs out, the kernel OOM killer picks a process to kill — and it might pick your database. Add a swap file as a safety net:
+
+```bash
+# Create a 2GB swap file
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# Make it permanent
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# Tune swappiness: prefer RAM, use swap only when needed
+echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.d/99-hardening.conf
+```
+
+Then protect critical services from the OOM killer:
+
+```bash
+# Make sshd nearly unkillable so you never lock yourself out
+systemctl set-property sshd.service OOMScoreAdjust=-900
+```
+
+Losing sshd to the OOM killer on a remote VPS means a provider console session or a reboot — avoidable with one line.
+
+## Step 12: Baseline Monitoring
+
+You can't secure what you can't see. Install a lightweight agent to baseline normal behavior — CPU, memory, disk, network — so anomalies stand out later:
+
+```bash
+# Install node_exporter for Prometheus metrics
+wget https://github.com/prometheus/node_exporter/releases/latest/download/node_exporter-*.linux-amd64.tar.gz
+tar xzf node_exporter-*.linux-amd64.tar.gz
+sudo mv node_exporter-*/node_exporter /usr/local/bin/
+
+# Run as a service, firewall the port to your monitoring server only
+sudo ufw allow from <monitoring-ip> to any port 9100
+```
+
+Even without a full Prometheus stack, having historical metrics lets you answer "when did this start?" after an incident.
+
 ## Conclusion
 
 Your VPS is now significantly more secure. The hardening steps we've covered — SSH key-only authentication, firewall rules, automatic updates, kernel hardening, and intrusion detection — form the foundation of production security.

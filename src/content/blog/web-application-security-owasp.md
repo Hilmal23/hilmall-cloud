@@ -351,6 +351,28 @@ No single control is sufficient. Layer your defenses:
 5. **Data**: Encryption at rest and in transit
 6. **Monitoring**: Logging, alerting, incident response
 
+## Building a Security Review Routine
+
+Knowledge of the Top 10 is useless without a process that applies it. Bake a lightweight security review into your development rhythm rather than treating security as a pre-launch audit.
+
+For every pull request, ask three questions: does this handle untrusted input, does it change an authorization decision, and does it touch cryptographic or authentication code? A "yes" to any of them triggers a closer look. This triage takes thirty seconds and catches the majority of issues before they merge.
+
+Supplement manual review with automated scanning in CI — dependency checks on every build, static analysis on every commit, and a dynamic scan against staging weekly. Tools find the mechanical issues; humans find the design flaws. Neither alone is sufficient, which is why mature teams also run periodic penetration tests and bug bounty programs — see our [bug bounty guide](/blog/bug-bounty-hunting-practical-guide) for how the offensive side approaches the same applications you're defending.
+
+## Security Headers Quick Reference
+
+A few HTTP headers shut down entire attack classes with almost no effort. Set these at your reverse proxy or framework level:
+
+```
+Content-Security-Policy: default-src 'self'
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: geolocation=(), camera=()
+```
+
+The CSP is the heavyweight — it tells the browser exactly which sources may load scripts, styles, and frames, neutralizing most XSS even when an injection slips through. Start with a report-only policy (`Content-Security-Policy-Report-Only`) to see what would break, tighten it over a week, then enforce. `X-Content-Type-Options: nosniff` stops MIME confusion, and `X-Frame-Options` blocks clickjacking. These five lines cost nothing and remove whole categories of findings from your next pentest report.
+
 ## Conclusion
 
 Web application security requires constant vigilance. The OWASP Top 10 provides a framework, but security is an ongoing process, not a destination.

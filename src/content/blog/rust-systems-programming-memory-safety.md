@@ -234,6 +234,65 @@ fn main() {
 }
 ```
 
+## Working with Unsafe Code
+
+Sometimes you need to step outside the borrow checker's guarantees — interfacing with C libraries, implementing certain data structures, or hitting performance targets the safe abstractions can't reach. Rust makes this explicit with `unsafe` blocks:
+
+```rust
+fn main() {
+    let mut num = 5;
+    let r1 = &num as *const i32;
+    let r2 = &mut num as *mut i32;
+
+    unsafe {
+        println!("r1 is: {}", *r1);  // Dereferencing raw pointer requires unsafe
+        *r2 = 10;                     // Mutation through raw pointer
+    }
+}
+```
+
+The key discipline is keeping `unsafe` blocks small and wrapping them in safe abstractions. The standard library itself does this constantly — `Vec` and `String` contain plenty of `unsafe` internally, but expose safe interfaces. When you write `unsafe`, document the invariant you're maintaining and why the borrow checker can't verify it. This makes review possible and keeps the unsafe surface auditable.
+
+## The Cargo Ecosystem
+
+Cargo is more than a package manager — it's the build system, test runner, and documentation generator in one:
+
+```bash
+cargo new myproject        # Scaffold a new project
+cargo build --release      # Optimized build
+cargo test                 # Run tests
+cargo clippy               # Lint for common mistakes
+cargo fmt                  # Format code
+cargo doc --open           # Generate and open documentation
+cargo audit                # Check dependencies for known vulnerabilities
+```
+
+Add `cargo clippy` and `cargo fmt` to CI from day one. Clippy catches hundreds of common mistakes — from redundant clones to suspicious operator precedence — and the fixes it suggests are usually the idiomatic ones. The `Cargo.toml` manifest declares dependencies with semver ranges, and the `Cargo.lock` file pins exact versions for reproducible builds. Commit the lockfile for applications, not for libraries.
+
+## Traits and Generics
+
+Traits are Rust's mechanism for shared behavior — closer to typeclasses than to classical inheritance:
+
+```rust
+trait Summary {
+    fn summarize(&self) -> String;
+
+    fn summarize_default(&self) -> String {
+        String::from("(Read more...)")
+    }
+}
+
+fn notify<T: Summary>(item: &T) {
+    println!("Breaking news! {}", item.summarize());
+}
+```
+
+Generics with trait bounds compile to monomorphized code — a specialized copy for each concrete type — so there's no runtime dispatch cost. Use dynamic dispatch with `&dyn Trait` only when you genuinely need heterogeneous collections.
+
+## When Not to Use Rust
+
+Honesty matters: Rust is not the right tool for every job. The borrow checker has a learning curve that slows down prototyping, and for a quick script or a CRUD web app, the safety guarantees buy you little while costing development speed. Rust shines when correctness and performance justify the upfront investment — CLI tools, network services, embedded systems, and anything that would otherwise be written in C or C++. If you're building a microservice in a larger polyglot system, our [Go microservices guide](/blog/go-cloud-native-microservices) covers a gentler on-ramp.
+
 ## Conclusion
 
 Rust's ownership model provides memory safety without runtime overhead. The learning curve is steep, but the payoff is systems code that's both fast and safe.

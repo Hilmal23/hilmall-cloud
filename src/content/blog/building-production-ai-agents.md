@@ -290,6 +290,77 @@ async def process_task(task_id: str):
         raise
 ```
 
+## Error Handling and Retries
+
+LLM APIs fail in ways traditional services don't — rate limits, context-length errors, content filter rejections, and the occasional nonsense response that parses fine but means nothing. Your agent loop needs to handle all of these distinctly:
+
+```python
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    reraise=True,
+)
+async def safe_completion(messages: list):
+    try:
+        return await llm.complete(messages)
+    except RateLimitError:
+        raise  # Retry — transient
+    except ContextLengthError:
+        # Don't retry — shrink the context and fail fast
+        raise NonRetryableError("context too long")
+    except ContentFilterError:
+        # Don't retry — log and surface to the user
+        raise NonRetryableError("content filtered")
+```
+
+The key distinction: transient errors get retried with backoff, permanent errors fail fast. Retrying a context-length error just burns tokens and time. Log every failure with the request ID so you can trace a bad agent run back through the LLM call chain later.
+
+## Testing Agent Behavior
+
+Agents are notoriously hard to test because the LLM is non-deterministic. The practical approach is to test at two levels.
+
+First, mock the LLM for unit tests — your tool logic, routing, and state management should be fully deterministic:
+
+```python
+class MockLLM:
+    def __init__(self, responses):
+        self.responses = iter(responses)
+    async def complete(self, messages, tools):
+        return next(self.responses)
+
+async def test_agent_uses_search_tool():
+    mock = MockLLM([
+        {"tool_call": {"name": "web_search", "input": {"query": "test"}}},
+        {"content": "The answer is 42"},
+    ])
+    agent = Agent(llm=mock, tools=[SearchTool()])
+    result = await agent.run("what is the answer?")
+    assert "42" in result
+```
+
+Second, run evaluation suites against the real model on a fixed set of prompts with expected outcomes. These aren't pass/fail tests — they're regression detectors. When you change a prompt or upgrade the model, run the eval suite and compare scores. A drop on "correctly refuses to exfiltrate data" is a red flag you want to catch before production.
+
+## Guardrails and Safety
+
+A production agent with tool access can do real damage — send emails, modify databases, spend money. Guardrails belong in code, not just in the prompt:
+
+```python
+ALLOWED_ACTIONS = {"web_search", "read_file", "calculate"}
+DESTRUCTIVE_ACTIONS = {"send_email", "delete_record", "charge_card"}
+
+def authorize_action(action: str, context: dict) -> bool:
+    if action not in ALLOWED_ACTIONS | DESTRUCTIVE_ACTIONS:
+        return False
+    if action in DESTRUCTIVE_ACTIONS:
+        # Require explicit human approval for destructive ops
+        return context.get("human_approved", False)
+    return True
+```
+
+Prompt-level instructions ("never delete anything") are suggestions the model might ignore under adversarial input. Code-level authorization is a hard boundary it cannot cross. Treat every tool that mutates state as requiring explicit gating, and log every invocation with inputs for audit.
+
 ## Conclusion
 
 Building production AI agents requires balancing capability, reliability, and cost. The patterns outlined here — proper tool design, robust memory management, and comprehensive monitoring — form the foundation of scalable agent systems.

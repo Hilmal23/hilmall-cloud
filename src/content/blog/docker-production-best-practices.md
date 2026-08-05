@@ -198,6 +198,101 @@ Before deploying to production:
 - [ ] Backup strategy defined
 - [ ] Rollback plan tested
 
+## Vulnerability Scanning in the Pipeline
+
+Shipping an unscanned image to production is asking for trouble. Base images accumulate CVEs over time, and your dependencies do too. Integrate scanning into CI so a vulnerable image never reaches the registry.
+
+```bash
+# Scan with Trivy (fast, free)
+trivy image --severity HIGH,CRITICAL myapp:latest
+
+# Fail the build on critical findings
+trivy image --exit-code 1 --severity CRITICAL myapp:latest
+```
+
+In GitHub Actions, run the scan right after the build:
+
+```yaml
+- name: Build image
+  run: docker build -t myapp:${{ github.sha }} .
+
+- name: Scan image
+  run: |
+    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+      aquasec/trivy image --exit-code 1 --severity CRITICAL \
+      myapp:${{ github.sha }}
+```
+
+Re-scan running images on a schedule. A base image that was clean last month may have a critical CVE today. We re-scan all production images weekly and alert on new critical findings. This catches the case where a deployed image becomes vulnerable after deployment.
+
+## Layer Caching and Build Speed
+
+Slow builds kill developer velocity. Order your Dockerfile from least-frequently-changed to most-frequently-changed so Docker's layer cache does the work.
+
+```dockerfile
+FROM node:20-alpine
+
+# Dependencies change rarely - cached across builds
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --only=production
+
+# Source changes often - only this layer rebuilds
+COPY . .
+
+CMD ["node", "server.js"]
+```
+
+Use BuildKit's cache mounts for even faster dependency installs:
+
+```dockerfile
+# syntax=docker/dockerfile:1
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --only=production
+```
+
+On a typical Node service, this cut our CI build time from four minutes to forty seconds. The cache mount persists the npm cache between builds, so `npm ci` only downloads what changed.
+
+## Graceful Shutdown and Signal Handling
+
+Containers that ignore SIGTERM leave connections dangling and corrupt data. Node and other runtimes don't forward signals to your app by default when it runs as PID 1.
+
+Use `tini` or `dumb-init` as the entrypoint:
+
+```dockerfile
+FROM node:20-alpine
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["node", "server.js"]
+```
+
+Then handle SIGTERM in your app so it drains connections before exiting:
+
+```javascript
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM received, draining connections');
+  server.close(async () => {
+    await db.end();
+    process.exit(0);
+  });
+  // Force exit after 10s if drain hangs
+  setTimeout(() => process.exit(1), 10000);
+});
+```
+
+Without this, a rolling update drops in-flight requests. With it, Kubernetes can terminate a pod cleanly and traffic shifts without errors. If you're also running web-facing services, pair this with the load balancer and health-check patterns in our [Go microservices guide](/blog/go-cloud-native-microservices).
+
+## Image Provenance and Supply Chain
+
+Pulling base images from public registries means trusting whoever published them. A compromised base image compromises every container built on it. Pin base images by digest, not just tag, so you get exactly the bits you reviewed:
+
+```dockerfile
+# Pinned by digest - immutable
+FROM node:20-alpine@sha256:1a2b3c4d5e6f...
+```
+
+Tags are mutable — `node:20-alpine` today may differ from last month. Digests are not. Combine pinning with a private registry mirror for images you depend on, so an upstream outage or a pulled image can't break your builds. Verify signatures where available with `cosign verify`, and keep a record of which digests are deployed so a rollback returns to a known-good image, not just a known-good tag.
+
 ## Conclusion
 
 Docker in production requires attention to security, performance, and reliability. The practices outlined here — minimal images, non-root execution, proper secrets management, and comprehensive monitoring — form the foundation of a robust container platform.

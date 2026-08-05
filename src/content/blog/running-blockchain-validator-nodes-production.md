@@ -154,6 +154,52 @@ Running a single validator is risky. We maintain a hot standby that can take ove
 
 For automated failover, we use a simple script that checks validator health every 30 seconds and initiates failover if three consecutive checks fail.
 
+## Key Management and Operational Security
+
+Your validator identity keypair is the most sensitive asset on the machine. A compromised identity key lets an attacker vote maliciously and get your stake slashed, or simply redirect your rewards. Treat key management as seriously as the staking economics.
+
+The validator identity key must live on the machine for the software to sign votes, but it should be encrypted at rest and its permissions locked to the service account:
+
+```bash
+chmod 600 ~/validator-keypair.json
+chown solana:solana ~/validator-keypair.json
+```
+
+The authorized withdrawer key — the one that controls where rewards go — should never touch the validator. Generate it on an air-gapped machine or a hardware wallet, and set it explicitly:
+
+```bash
+solana-vote-account authorize-withdrawer <VOTE_ACCOUNT> <NEW_AUTHORITY>
+```
+
+Rotate the identity key periodically and after any suspected compromise. Some operators run the identity key on a remote signer so the hot machine holds no key material at all; this adds latency to every vote, so measure the impact on skip rate before committing to it.
+
+## Validator Economics: The Real Numbers
+
+Before committing hardware budget, model the economics honestly. Revenue comes from inflation rewards on your stake, plus MEV tips if you run a client like Jito. Costs are hardware, bandwidth, and your time.
+
+As a rough baseline for a Solana validator: inflation rewards run around 6-8% APY on stake, and vote fees cost roughly 1-1.5 SOL per day to stay current. That means a validator needs substantial stake — either self-staked or delegated — before rewards exceed operating costs. Commission rates on delegated stake typically run 5-10%, and attracting delegation requires a track record of uptime and reasonable commission.
+
+The practical implication: don't size hardware to the minimum and hope delegation arrives. Either bring your own stake, join a delegation program like the Solana Foundation Delegation Program (which has strict performance requirements), or accept that you're running at a loss while building reputation.
+
+## Handling Network Upgrades
+
+Validator clients release upgrades regularly, and some are mandatory with a deadline. Running an outdated version during an activation epoch can halt your validator or, worse, get it on the wrong fork.
+
+The safe upgrade procedure:
+
+1. **Watch release channels**: Follow the network's validator-announce channels. Upgrades are announced days in advance.
+2. **Test on testnet first**: Run the new version on testnet before touching mainnet.
+3. **Snapshot the ledger**: Before upgrading, take a snapshot so you can roll back if the new version misbehaves.
+4. **Restart during low activity**: Restart when the cluster is quiet, and monitor the first epoch closely for delinquency.
+
+Never upgrade during your leader slots if you can avoid it. Tools like `solana-validator exit --max-delinquent-stake 5` let you wait for a safe window where a restart won't hurt the cluster.
+
+## Validator vs. RPC Node: Know the Difference
+
+A common point of confusion: a validator and an RPC node are different roles with different requirements. A validator participates in consensus, votes, and produces blocks. An RPC node serves read traffic — account queries, transaction submission — and doesn't vote.
+
+RPC nodes need less security isolation (no signing keys to protect) but often more resources for query serving, especially with indexing enabled. Many operators run both: a hardened validator with no public RPC, plus separate RPC nodes behind a load balancer for application traffic. Splitting these roles means your validator isn't competing with query load during its leader slots, which directly improves block production and rewards.
+
 ## Conclusion
 
 Running production validator nodes requires careful planning, robust hardware, and comprehensive monitoring. The investment in proper infrastructure pays off through consistent rewards and avoided penalties. Start with the fundamentals — reliable hardware, hardened OS, and solid monitoring — then iterate based on your specific network's requirements.

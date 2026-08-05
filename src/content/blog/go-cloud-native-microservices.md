@@ -377,6 +377,100 @@ spec:
           periodSeconds: 10
 ```
 
+## Graceful Shutdown
+
+A service that kills in-flight requests on deploy is a service users notice. Go's `http.Server` supports graceful shutdown out of the box — you just have to wire it up:
+
+```go
+func main() {
+    srv := &http.Server{Addr: ":8080", Handler: router}
+
+    // Run server in a goroutine
+    go func() {
+        if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+            log.Fatalf("listen: %v", err)
+        }
+    }()
+
+    // Wait for interrupt signal
+    quit := make(chan os.Signal, 1)
+    signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+    <-quit
+    log.Println("shutting down...")
+
+    // Give in-flight requests 30 seconds to finish
+    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+    defer cancel()
+
+    if err := srv.Shutdown(ctx); err != nil {
+        log.Fatalf("forced shutdown: %v", err)
+    }
+    log.Println("server exited cleanly")
+}
+```
+
+In Kubernetes, this pairs with the `preStop` hook and a `terminationGracePeriodSeconds` long enough for your slowest request. The orchestrator sends SIGTERM, your server stops accepting new connections, drains the old ones, and exits — zero dropped requests during a rollout.
+
+## Error Handling That Scales
+
+Go's explicit error returns are verbose but powerful. The pattern that scales: wrap errors with context as they travel up the stack, and check the sentinel at the boundary:
+
+```go
+var ErrNotFound = errors.New("not found")
+
+func (r *repo) FindByID(ctx context.Context, id string) (*User, error) {
+    // ...
+    if err == sql.ErrNoRows {
+        return nil, fmt.Errorf("user %s: %w", id, ErrNotFound)
+    }
+}
+
+// At the HTTP boundary
+func getUserHandler(w http.ResponseWriter, r *http.Request) {
+    user, err := svc.GetUser(r.Context(), chi.URLParam(r, "id"))
+    if errors.Is(err, ErrNotFound) {
+        http.Error(w, "user not found", http.StatusNotFound)
+        return
+    }
+    if err != nil {
+        http.Error(w, "internal error", http.StatusInternalServerError)
+        return
+    }
+    json.NewEncoder(w).Encode(user)
+}
+```
+
+`errors.Is` unwraps the chain, so internal details stay internal while the handler makes the right HTTP decision. Log the full wrapped error server-side; return only safe messages to clients — the same principle we stress in the [web security guide](/blog/web-application-security-owasp).
+
+## Context Propagation
+
+`context.Context` carries deadlines, cancellation, and request-scoped values through your call stack. The rules are simple but frequently violated:
+
+- **Always accept ctx as the first parameter** and pass it down. Never store it in a struct.
+- **Propagate cancellation**: when a client disconnects, the context cancels — and your database query should stop too, freeing resources instead of finishing work nobody will read.
+- **Set timeouts at the edges**: inbound HTTP handlers and outbound RPC calls should both have deadlines.
+
+```go
+ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+defer cancel()
+user, err := repo.FindByID(ctx, id)  // Aborts if it takes >5s
+```
+
+Without context propagation, a slow database turns a single request into a resource leak that compounds under load. With it, timeouts cascade cleanly through every layer.
+
+## Production Checklist
+
+Before shipping a Go service:
+
+- [ ] Graceful shutdown wired to SIGTERM
+- [ ] Health endpoints (`/healthz` liveness, `/readyz` readiness)
+- [ ] Timeouts on all inbound handlers and outbound calls
+- [ ] Connection pools sized (not left at defaults)
+- [ ] Structured logs with request IDs
+- [ ] Metrics exported (requests, latency, errors)
+- [ ] `go vet` and `staticcheck` clean in CI
+- [ ] Race detector run in tests (`go test -race`)
+
 ## Conclusion
 
 Go's simplicity and performance make it ideal for cloud-native microservices. The patterns covered here — clean architecture, comprehensive observability, and proper testing — form the foundation of production-grade Go services.

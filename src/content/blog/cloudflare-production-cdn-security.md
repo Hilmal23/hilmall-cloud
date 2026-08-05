@@ -272,6 +272,80 @@ Key metrics to monitor:
 - Bandwidth savings
 - Threats blocked
 
+## Securing the Origin Server
+
+Putting Cloudflare in front of your site doesn't help if attackers can bypass it and hit your origin directly. If your origin IP is discoverable — and it usually is, through historical DNS records or certificate transparency logs — all your WAF rules are decorative.
+
+Lock the origin down so it only accepts traffic from Cloudflare's IP ranges:
+
+```bash
+# Allow only Cloudflare IPs on web ports
+for ip in $(curl -s https://www.cloudflare.com/ips-v4); do
+  ufw allow from $ip to any port 443 proto tcp
+done
+
+# Deny everyone else
+ufw deny 443/tcp
+```
+
+For stronger guarantees, use **authenticated origin pulls** — Cloudflare presents a client certificate that your origin verifies:
+
+```nginx
+ssl_client_certificate /etc/nginx/cloudflare-origin.pem;
+ssl_verify_client on;
+```
+
+With this in place, a direct request to your origin without Cloudflare's certificate gets rejected at the TLS layer. This is the single most important step most people skip, and it pairs naturally with the firewall discipline in our [Linux VPS hardening guide](/blog/linux-vps-hardening-production-ready).
+
+## Debugging Workers
+
+Workers fail silently if you're not careful — an exception in a fetch handler just returns a 500 to the user. Use `wrangler tail` to stream live logs during development:
+
+```bash
+# Watch real-time logs from your Worker
+wrangler tail my-worker
+
+# Filter to errors only
+wrangler tail my-worker --status error
+```
+
+For structured logging in production, push logs to an external service with Logpush, or emit them to your own endpoint from within the Worker. Keep payloads small — every byte you log is a byte processed at the edge, and verbose logging at high request rates adds real cost.
+
+## Managing Cloudflare with Terraform
+
+Clicking through the dashboard doesn't scale beyond one zone. Cloudflare has a first-class Terraform provider, which lets you version-control your DNS records, WAF rules, and page rules alongside the rest of your infrastructure — the same workflow we cover in our [Infrastructure as Code guide](/blog/infrastructure-as-code-terraform-ansible):
+
+```hcl
+resource "cloudflare_record" "api" {
+  zone_id = var.zone_id
+  name    = "api"
+  content = "203.0.113.10"
+  type    = "A"
+  proxied = true
+}
+
+resource "cloudflare_ruleset" "waf_custom" {
+  zone_id = var.zone_id
+  name    = "Custom WAF rules"
+  kind    = "zone"
+  phase   = "http_request_firewall_custom"
+
+  rules {
+    action = "block"
+    expression = "(http.request.uri.path contains \"/.env\")"
+    description = "Block env file probes"
+  }
+}
+```
+
+Now a `terraform plan` shows you exactly what changes before anything touches production, and a bad change rolls back with `git revert`.
+
+## Page Rules vs. Cache Rules
+
+Cloudflare has two overlapping systems for controlling behavior: the older Page Rules and the newer Rulesets (Cache Rules, Redirect Rules, Transform Rules). Prefer the newer Rulesets — they're more flexible, better documented, and where Cloudflare is investing. Page Rules still work and some features only exist there, but for new configurations start with Cache Rules for caching behavior and Redirect Rules for URL handling.
+
+A practical Cache Rule for a static site: match on file extension for CSS/JS/images, set Edge TTL to a month, and bypass cache for anything under `/admin`. Keep rules few and explicit — a tangle of overlapping rules becomes impossible to debug when caching misbehaves.
+
 ## Conclusion
 
 Cloudflare's platform provides comprehensive edge capabilities — CDN, security, and compute — in a single service. The configurations covered here provide a solid foundation for production deployments.

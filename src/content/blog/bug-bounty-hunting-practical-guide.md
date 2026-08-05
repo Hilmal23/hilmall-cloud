@@ -209,6 +209,60 @@ Always follow responsible disclosure:
 3. **Don't access user data**: Prove the vulnerability without accessing real user data
 4. **Follow program rules**: Read and follow the program's policy
 
+## Note-Taking and Evidence Organization
+
+Serious hunting generates mountains of data — subdomains, endpoints, screenshots, request/response pairs. Without a system you'll lose track and re-test the same paths or, worse, lose the evidence you need when writing the report.
+
+Keep a per-program directory with a running notes file:
+
+```
+targets/
+└── acme-corp/
+    ├── notes.md
+    ├── subdomains.txt
+    ├── endpoints.txt
+    ├── screenshots/
+    └── requests/
+```
+
+Log every interesting endpoint with a one-line hypothesis: `GET /api/export?user_id= — test IDOR on user_id param`. When you circle back days later, these notes tell you exactly where you left off. Screenshot every finding the moment you see it — applications change, and a vulnerability you found today may be patched tomorrow, leaving you with no proof.
+
+## Building a Testing Methodology
+
+Random poking finds random bugs. A repeatable methodology finds them consistently. Work the application in passes, one vulnerability class per pass:
+
+1. **Map the application**: Browse every feature while proxying through Burp. Build a complete site map before touching anything.
+2. **Authentication and session pass**: Test registration, login, password reset, session fixation, and logout.
+3. **Authorization pass**: For every object reference, test horizontal and vertical privilege escalation.
+4. **Input pass**: Test every parameter for injection — SQL, command, template, and XSS.
+5. **Business logic pass**: Test workflows — can you skip a payment step, apply a coupon twice, or order negative quantities?
+
+Business logic bugs are the least crowded space because they can't be found by scanners. Understanding what the application is *supposed* to do is the prerequisite for finding where it fails to enforce it.
+
+## Automating Repetitive Work
+
+Automate the boring parts so your time goes to manual testing where the real bugs hide. A simple recon loop in bash covers most of the early grind:
+
+```bash
+#!/bin/bash
+DOMAIN=$1
+subfinder -d $DOMAIN -silent | sort -u > subs.txt
+cat subs.txt | httpx -silent -status-code -title -o live.txt
+cat subs.txt | gau --threads 5 >> urls.txt
+sort -u urls.txt -o urls.txt
+```
+
+Run this nightly against your active programs. When a new subdomain or endpoint appears, diff against yesterday's output — fresh attack surface is where fresh bugs live. Pair this with the VPS setup in our [Linux hardening guide](/blog/linux-vps-hardening-production-ready) to run recon continuously on a cheap server instead of your laptop.
+
+## Common Mistakes to Avoid
+
+New hunters burn out on the same traps:
+
+- **Testing out-of-scope assets**: Read the scope twice. A critical finding on an out-of-scope host pays nothing and can get you banned.
+- **Over-relying on scanners**: Scanners find the low-hanging fruit everyone else already reported. Use them for breadth, not depth.
+- **Ignoring duplicates**: Most reports are duplicates. When you find something obvious, assume it's known and dig one layer deeper for a variant.
+- **Chasing every program**: Depth on two programs beats shallow coverage of twenty.
+
 ## Conclusion
 
 Bug bounty hunting requires persistence, creativity, and continuous learning. Start with programs that have clear scope and good payouts, master the common vulnerability classes, and always write professional reports.
