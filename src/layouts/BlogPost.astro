@@ -1,0 +1,110 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { Image } from 'astro:assets';
+
+export interface Props {
+  frontmatter: {
+    title: string;
+    description: string;
+    pubDate: Date;
+    updatedDate?: Date;
+    author?: string;
+    tags?: string[];
+    image?: string;
+  };
+}
+
+const { frontmatter } = Astro.props;
+const { title, description, pubDate, updatedDate, author = 'Hilmall Cloud', tags = [], image } = frontmatter;
+
+const formattedDate = pubDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description: description,
+  datePublished: pubDate.toISOString(),
+  dateModified: updatedDate?.toISOString() || pubDate.toISOString(),
+  author: {
+    '@type': 'Organization',
+    name: author,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Hilmall Cloud',
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/favicon.svg', Astro.site).href,
+    },
+  },
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': Astro.url.href,
+  },
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  article={true}
+  publishedTime={pubDate.toISOString()}
+  modifiedTime={updatedDate?.toISOString()}
+  image={image}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} slot="head" />
+  <Header />
+  <main class="flex-1 bg-dark">
+    <article class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+      <!-- Article Header -->
+      <header class="mb-8">
+        <div class="flex flex-wrap gap-2 mb-4">
+          {tags.map((tag) => (
+            <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              {tag}
+            </span>
+          ))}
+        </div>
+        <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+          {title}
+        </h1>
+        <div class="mt-4 flex items-center gap-4 text-sm text-gray-400">
+          <time datetime={pubDate.toISOString()}>{formattedDate}</time>
+          {updatedDate && (
+            <span class="text-gray-500">
+              (Updated: {updatedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })})
+            </span>
+          )}
+          <span>·</span>
+          <span>{author}</span>
+        </div>
+      </header>
+
+      <!-- Article Content -->
+      <div class="prose prose-invert prose-lg max-w-none">
+        <slot />
+      </div>
+
+      <!-- Share / Back -->
+      <div class="mt-12 border-t border-dark-border pt-8">
+        <a
+          href="/blog"
+          class="inline-flex items-center gap-2 text-primary hover:text-primary-dark transition-colors"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Blog
+        </a>
+      </div>
+    </article>
+  </main>
+  <Footer />
+</BaseLayout>

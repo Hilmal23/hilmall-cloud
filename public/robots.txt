@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Disallow admin/private paths
+Disallow: /api/
+Disallow: /admin/
+
+# Sitemap
+Sitemap: https://hilmall.cloud/sitemap-index.xml

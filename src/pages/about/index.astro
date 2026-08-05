@@ -1,0 +1,90 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<BaseLayout title="About" description="About Hilmall Cloud - Technical content about AI infrastructure, bug bounty, blockchain, and modern DevOps.">
+  <Header />
+  <main class="flex-1 bg-dark">
+    <div class="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+      <h1 class="text-4xl font-bold text-white mb-8">About Hilmall Cloud</h1>
+      
+      <div class="prose prose-invert prose-lg max-w-none">
+        <p class="text-xl text-gray-300 mb-8">
+          Hilmall Cloud is a technical publication focused on infrastructure engineering, 
+          security research, and modern DevOps practices. We write for practitioners who 
+          build and operate production systems.
+        </p>
+
+        <h2 class="text-2xl font-bold text-white mt-12 mb-4">What We Cover</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose">
+          <div class="rounded-xl border border-dark-border bg-dark-card p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">Infrastructure</h3>
+            <p class="text-gray-400 text-sm">
+              Linux VPS administration, Docker containerization, Kubernetes orchestration, 
+              and cloud-native architecture.
+            </p>
+          </div>
+          
+          <div class="rounded-xl border border-dark-border bg-dark-card p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">Blockchain</h3>
+            <p class="text-gray-400 text-sm">
+              Validator node operations, consensus mechanisms, and blockchain infrastructure 
+              for networks like Solana and Ethereum.
+            </p>
+          </div>
+          
+          <div class="rounded-xl border border-dark-border bg-dark-card p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">Security</h3>
+            <p class="text-gray-400 text-sm">
+              Bug bounty hunting, web application security, penetration testing, and 
+              responsible disclosure practices.
+            </p>
+          </div>
+          
+          <div class="rounded-xl border border-dark-border bg-dark-card p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">AI & ML</h3>
+            <p class="text-gray-400 text-sm">
+              AI agent architecture, LLM integration, and machine learning infrastructure 
+              for production workloads.
+            </p>
+          </div>
+        </div>
+
+        <h2 class="text-2xl font-bold text-white mt-12 mb-4">Our Approach</h2>
+        <p>
+          Every article is written from hands-on experience. We don't cover theoretical 
+          concepts we haven't implemented ourselves. When we write about running Solana 
+          validators, it's because we operate them. When we cover Docker security, it's 
+          because we've hardened production containers.
+        </p>
+        <p>
+          We believe in:
+        </p>
+        <ul>
+          <li><strong>Practical over theoretical</strong> — Real commands, real configs, real experience</li>
+          <li><strong>Security first</strong> — Every guide includes security considerations</li>
+          <li><strong>Production-ready</strong> — Code you can deploy, not just examples</li>
+          <li><strong>Continuous learning</strong> — The infrastructure space evolves; so do we</li>
+        </ul>
+
+        <h2 class="text-2xl font-bold text-white mt-12 mb-4">Our Infrastructure</h2>
+        <p>
+          This site is hosted on Evolution Host's high-performance VPS infrastructure. 
+          We chose Evolution Host for their reliable network, competitive pricing, and 
+          support for the types of workloads we write about — from blockchain nodes to 
+          AI inference endpoints.
+        </p>
+
+        <h2 class="text-2xl font-bold text-white mt-12 mb-4">Contact</h2>
+        <p>
+          Have questions, suggestions, or want to contribute? Reach out through our 
+          <a href="/contact" class="text-primary hover:underline">contact page</a>.
+        </p>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

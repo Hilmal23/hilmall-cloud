@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const allTags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
+---
+
+<BaseLayout title="Blog" description="Technical articles about blockchain nodes, Linux VPS, Docker, AI agents, bug bounty, Rust, Golang, and cloud infrastructure.">
+  <Header />
+  <main class="flex-1 bg-dark">
+    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div class="mb-12">
+        <h1 class="text-4xl font-bold text-white mb-4">Blog</h1>
+        <p class="text-lg text-gray-400 max-w-2xl">
+          In-depth technical guides and tutorials covering blockchain infrastructure, 
+          server administration, security research, and modern DevOps practices.
+        </p>
+      </div>
+
+      <!-- Tags filter -->
+      <div class="mb-8 flex flex-wrap gap-2">
+        <span class="text-sm text-gray-500 mr-2">Filter by:</span>
+        {allTags.map((tag) => (
+          <a
+            href={`/blog/tag/${tag.toLowerCase().replace(/\s+/g, '-')}`}
+            class="rounded-full border border-dark-border px-3 py-1 text-sm text-gray-400 hover:border-primary hover:text-primary transition-colors"
+          >
+            {tag}
+          </a>
+        ))}
+      </div>
+
+      <!-- Posts Grid -->
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {posts.map((post) => (
+          <article class="group flex flex-col rounded-xl border border-dark-border bg-dark-card p-6 hover:border-primary/50 transition-colors">
+            <div class="flex flex-wrap gap-2 mb-3">
+              {post.data.tags.map((tag) => (
+                <span class="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{tag}</span>
+              ))}
+            </div>
+            <h2 class="text-xl font-semibold text-white group-hover:text-primary transition-colors mb-2">
+              <a href={`/blog/${post.id}`}>{post.data.title}</a>
+            </h2>
+            <p class="text-sm text-gray-400 line-clamp-3 mb-4 flex-1">{post.data.description}</p>
+            <div class="flex items-center justify-between mt-auto">
+              <time class="text-xs text-gray-500" datetime={post.data.pubDate.toISOString()}>
+                {post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </time>
+              <a
+                href={`/blog/${post.id}`}
+                class="text-sm text-primary hover:text-primary-dark font-medium"
+              >
+                Read →
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {posts.length === 0 && (
+        <div class="text-center py-12">
+          <p class="text-gray-400">No posts yet. Check back soon!</p>
+        </div>
+      )}
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

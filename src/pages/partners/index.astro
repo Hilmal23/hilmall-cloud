@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<BaseLayout title="Partners" description="Hilmall Cloud partners - Infrastructure providers and technology partners that power our content.">
+  <Header />
+  <main class="flex-1 bg-dark">
+    <div class="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+      <h1 class="text-4xl font-bold text-white mb-8">Partners</h1>
+      
+      <div class="prose prose-invert max-w-none mb-12">
+        <p class="text-xl text-gray-300">
+          We partner with infrastructure providers and technology companies that power 
+          our content and enable us to bring you in-depth technical guides.
+        </p>
+      </div>
+
+      <!-- Evolution Host - Featured Partner -->
+      <div class="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-accent/10 p-8 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center gap-6">
+          <div class="flex-shrink-0">
+            <div class="h-16 w-16 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+              </svg>
+            </div>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <h2 class="text-2xl font-bold text-white">Evolution Host</h2>
+              <span class="rounded-full bg-primary/20 px-3 py-1 text-xs font-medium text-primary">Featured Partner</span>
+            </div>
+            <p class="text-gray-300 mb-4">
+              Our infrastructure partner. Evolution Host provides the high-performance VPS 
+              that powers Hilmall Cloud. Their reliable network, competitive pricing, and 
+              support for demanding workloads make them ideal for blockchain nodes, 
+              Docker deployments, and AI applications.
+            </p>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="rounded-full bg-dark-border px-3 py-1 text-xs text-gray-400">VPS Hosting</span>
+              <span class="rounded-full bg-dark-border px-3 py-1 text-xs text-gray-400">Blockchain Nodes</span>
+              <span class="rounded-full bg-dark-border px-3 py-1 text-xs text-gray-400">DDoS Protection</span>
+              <span class="rounded-full bg-dark-border px-3 py-1 text-xs text-gray-400">Global Network</span>
+            </div>
+            <a
+              href="https://evolution-host.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 text-primary hover:text-primary-dark font-medium"
+            >
+              Visit Evolution Host
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Other Partners Grid -->
+      <h2 class="text-2xl font-bold text-white mb-6">Technology Partners</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="rounded-xl border border-dark-border bg-dark-card p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="h-10 w-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
+              <svg class="h-5 w-5 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">Cloudflare</h3>
+          </div>
+          <p class="text-sm text-gray-400 mb-3">
+            CDN, security, and edge computing platform. We use Cloudflare for DNS, 
+            DDoS protection, and content delivery.
+          </p>
+          <a href="https://cloudflare.com" target="_blank" rel="noopener noreferrer" class="text-sm text-primary hover:underline">
+            Learn more →
+          </a>
+        </div>
+
+        <div class="rounded-xl border border-dark-border bg-dark-card p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="h-10 w-10 rounded-lg bg-gray-700 flex items-center justify-center">
+              <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">GitHub</h3>
+          </div>
+          <p class="text-sm text-gray-400 mb-3">
+            Code hosting and collaboration. Our open-source projects and this site's 
+            source code are hosted on GitHub.
+          </p>
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="text-sm text-primary hover:underline">
+            Learn more →
+          </a>
+        </div>
+      </div>
+
+      <!-- Become a Partner -->
+      <div class="mt-12 rounded-xl border border-dark-border bg-dark-card p-8 text-center">
+        <h2 class="text-xl font-bold text-white mb-4">Become a Partner</h2>
+        <p class="text-gray-400 mb-6 max-w-2xl mx-auto">
+          Interested in partnering with Hilmall Cloud? We're selective about partnerships 
+          and only work with companies whose products we use and trust.
+        </p>
+        <a
+          href="/contact"
+          class="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-dark transition-colors"
+        >
+          Contact Us
+        </a>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

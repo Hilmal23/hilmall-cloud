@@ -1,0 +1,117 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const resources = (await getCollection('resources', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const categories = [
+  {
+    name: 'Tools & Software',
+    items: [
+      { name: 'Docker', description: 'Container platform for application deployment', url: 'https://docker.com' },
+      { name: 'Kubernetes', description: 'Container orchestration platform', url: 'https://kubernetes.io' },
+      { name: 'Terraform', description: 'Infrastructure as Code tool', url: 'https://terraform.io' },
+      { name: 'Ansible', description: 'Configuration management and automation', url: 'https://ansible.com' },
+    ]
+  },
+  {
+    name: 'Security Resources',
+    items: [
+      { name: 'OWASP', description: 'Web application security resources', url: 'https://owasp.org' },
+      { name: 'HackerOne', description: 'Bug bounty platform', url: 'https://hackerone.com' },
+      { name: 'Bugcrowd', description: 'Crowdsourced security platform', url: 'https://bugcrowd.com' },
+      { name: 'PortSwigger', description: 'Web security academy and tools', url: 'https://portswigger.net' },
+    ]
+  },
+  {
+    name: 'Blockchain',
+    items: [
+      { name: 'Solana', description: 'High-performance blockchain', url: 'https://solana.com' },
+      { name: 'Ethereum', description: 'Smart contract platform', url: 'https://ethereum.org' },
+      { name: 'Jito', description: 'MEV infrastructure for Solana', url: 'https://jito.wtf' },
+    ]
+  },
+  {
+    name: 'Learning',
+    items: [
+      { name: 'Rust Book', description: 'Official Rust programming guide', url: 'https://doc.rust-lang.org/book/' },
+      { name: 'Go by Example', description: 'Hands-on Go introduction', url: 'https://gobyexample.com' },
+      { name: 'Linux Journey', description: 'Learn Linux fundamentals', url: 'https://linuxjourney.com' },
+    ]
+  }
+];
+---
+
+<BaseLayout title="Resources" description="Curated resources for infrastructure engineers, security researchers, and developers.">
+  <Header />
+  <main class="flex-1 bg-dark">
+    <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div class="mb-12">
+        <h1 class="text-4xl font-bold text-white mb-4">Resources</h1>
+        <p class="text-lg text-gray-400 max-w-2xl">
+          Curated tools, platforms, and learning resources that we use and recommend 
+          for infrastructure engineering, security research, and development.
+        </p>
+      </div>
+
+      <div class="space-y-12">
+        {categories.map((category) => (
+          <section>
+            <h2 class="text-2xl font-bold text-white mb-6">{category.name}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {category.items.map((item) => (
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="group rounded-xl border border-dark-border bg-dark-card p-6 hover:border-primary/50 transition-colors"
+                >
+                  <h3 class="text-lg font-semibold text-white group-hover:text-primary transition-colors mb-2">
+                    {item.name}
+                  </h3>
+                  <p class="text-sm text-gray-400">{item.description}</p>
+                </a>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+
+      <!-- Guides Section -->
+      <section class="mt-16">
+        <h2 class="text-2xl font-bold text-white mb-6">Our Guides</h2>
+        <div class="rounded-xl border border-dark-border bg-dark-card p-6">
+          <p class="text-gray-400 mb-4">
+            Check out our in-depth technical guides:
+          </p>
+          <ul class="space-y-2">
+            <li>
+              <a href="/blog/running-blockchain-validator-nodes-production" class="text-primary hover:underline">
+                Running Blockchain Validator Nodes in Production
+              </a>
+            </li>
+            <li>
+              <a href="/blog/linux-vps-hardening-production-ready" class="text-primary hover:underline">
+                Linux VPS Hardening Guide
+              </a>
+            </li>
+            <li>
+              <a href="/blog/docker-production-best-practices" class="text-primary hover:underline">
+                Docker Production Best Practices
+              </a>
+            </li>
+            <li>
+              <a href="/blog/bug-bounty-hunting-practical-guide" class="text-primary hover:underline">
+                Bug Bounty Hunting Guide
+              </a>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

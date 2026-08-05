@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #6366f1;
+  --color-primary-dark: #4f46e5;
+  --color-accent: #06b6d4;
+  --color-dark: #0a0e1a;
+  --color-dark-card: #111827;
+  --color-dark-border: #1f2937;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white text-gray-900 antialiased;
+  font-family: var(--font-sans);
+}
+
+.dark body {
+  @apply bg-dark text-gray-100;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-dark;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-700 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-600;
+}
+
+/* Code blocks */
+pre {
+  @apply bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm leading-relaxed;
+  font-family: var(--font-mono);
+}
+
+code {
+  @apply bg-gray-100 dark:bg-gray-800 text-primary dark:text-accent px-1.5 py-0.5 rounded text-sm;
+  font-family: var(--font-mono);
+}
+
+pre code {
+  @apply bg-transparent p-0 text-inherit;
+}
+
+/* Prose overrides */
+.prose {
+  @apply text-gray-700 dark:text-gray-300 leading-relaxed;
+}
+.prose h2 {
+  @apply text-2xl font-bold mt-8 mb-4 text-gray-900 dark:text-white;
+}
+.prose h3 {
+  @apply text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-white;
+}
+.prose p {
+  @apply mb-4;
+}
+.prose ul {
+  @apply list-disc pl-6 mb-4 space-y-2;
+}
+.prose ol {
+  @apply list-decimal pl-6 mb-4 space-y-2;
+}
+.prose a {
+  @apply text-primary dark:text-accent hover:underline;
+}
+.prose blockquote {
+  @apply border-l-4 border-primary pl-4 italic my-4 text-gray-600 dark:text-gray-400;
+}
