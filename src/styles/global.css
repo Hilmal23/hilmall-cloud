@@ -103,7 +103,7 @@ body {
   position: absolute;
   border-radius: 50%;
   filter: blur(80px);
-  opacity: 0.3;
+  opacity: 0.34;
   pointer-events: none;
   will-change: transform;
 }
@@ -169,11 +169,12 @@ pre code {
   }
 }
 
-/* ---- Mobile readability: brighter cards + clearer borders on small screens ---- */
+/* ---- Mobile readability: brighter cards + clearer borders + firmer shadow on small screens ---- */
 @media (max-width: 640px) {
   .glow-card {
-    background: var(--color-dark-elevated);
-    border-color: var(--color-dark-border-light);
+    background: #1c1c22;
+    border-color: #38384a;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
   }
 }
 
