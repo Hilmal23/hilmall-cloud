@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #6366f1;
-  --color-primary-light: #818cf8;
-  --color-primary-dark: #4f46e5;
-  --color-accent: #22d3ee;
-  --color-accent-dark: #06b6d4;
-  --color-dark: #050507;
-  --color-dark-soft: #0a0a0f;
-  --color-dark-card: #101018;
-  --color-dark-elevated: #16161f;
-  --color-dark-border: #1f1f2b;
-  --color-dark-border-light: #2a2a3a;
+  --color-primary: #10b981;
+  --color-primary-light: #34d399;
+  --color-primary-dark: #059669;
+  --color-accent: #34d399;
+  --color-accent-dark: #10b981;
+  --color-dark: #0b0b0c;
+  --color-dark-soft: #101013;
+  --color-dark-card: #141417;
+  --color-dark-elevated: #1a1a1e;
+  --color-dark-border: #232328;
+  --color-dark-border-light: #2e2e35;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
@@ -72,7 +72,7 @@ body {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(34, 211, 238, 0.2));
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(34, 211, 238, 0.2));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -83,7 +83,7 @@ body {
 }
 .glow-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.12);
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.12);
 }
 .glow-card:hover::before {
   opacity: 1;
@@ -92,8 +92,8 @@ body {
 /* ---- Aurora / animated grid hero ---- */
 .hero-grid {
   background-image:
-    linear-gradient(rgba(99, 102, 241, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99, 102, 241, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(16, 185, 129, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 185, 129, 0.07) 1px, transparent 1px);
   background-size: 44px 44px;
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 60%, transparent 100%);
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 60%, transparent 100%);
@@ -116,7 +116,7 @@ body {
 
 /* ---- Selection ---- */
 ::selection {
-  background: rgba(99, 102, 241, 0.35);
+  background: rgba(16, 185, 129, 0.35);
   color: #fff;
 }
 

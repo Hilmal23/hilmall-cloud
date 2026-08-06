@@ -16,7 +16,7 @@ export default function HeroBackground() {
           height: '42vw',
           top: '-12%',
           left: '-8%',
-          background: 'radial-gradient(circle, #6366f1 0%, transparent 70%)',
+          background: 'radial-gradient(circle, #10b981 0%, transparent 70%)',
         }}
         animate={
           reduceMotion
@@ -32,7 +32,7 @@ export default function HeroBackground() {
           height: '36vw',
           top: '4%',
           right: '-10%',
-          background: 'radial-gradient(circle, #22d3ee 0%, transparent 70%)',
+          background: 'radial-gradient(circle, #34d399 0%, transparent 70%)',
         }}
         animate={
           reduceMotion
@@ -48,7 +48,7 @@ export default function HeroBackground() {
           height: '30vw',
           bottom: '-14%',
           left: '30%',
-          background: 'radial-gradient(circle, #4f46e5 0%, transparent 70%)',
+          background: 'radial-gradient(circle, #059669 0%, transparent 70%)',
           opacity: 0.18,
         }}
         animate={
