@@ -23,3 +23,6 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 .gh_token
+
+# visual QA screenshots (local only)
+review/
