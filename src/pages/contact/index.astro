@@ -64,7 +64,10 @@ import Footer from '../../components/Footer.astro';
         
         <div class="rounded-xl border border-dark-border bg-dark-card p-6">
           <h2 class="text-xl font-bold text-white mb-4">Send a Message</h2>
-          <form class="space-y-4" action="https://formspree.io/f/your-form-id" method="POST">
+          <form class="space-y-4" action="https://formspree.io/f/mljrearn" method="POST">
+            <input type="hidden" name="_next" value="https://hilmall.cloud/thanks/" />
+            <input type="hidden" name="_subject" value="New message from hilmall.cloud contact form" />
+            <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" style="display:none" />
             <div>
               <label for="name" class="block text-sm font-medium text-gray-300 mb-1">Name</label>
               <input
