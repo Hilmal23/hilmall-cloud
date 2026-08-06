@@ -11,76 +11,104 @@ const navItems = [
 const currentPath = Astro.url.pathname;
 ---
 
-<header class="sticky top-0 z-50 w-full border-b border-dark-border bg-dark/95 backdrop-blur supports-[backdrop-filter]:bg-dark/80">
-  <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-    <!-- Logo -->
-    <a href="/" class="flex items-center gap-2 text-xl font-bold text-white">
-      <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
-        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
+<header class="fixed top-0 z-50 w-full transition-all duration-300" id="site-header">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <nav class="mt-4 flex h-14 items-center justify-between rounded-2xl glass-strong px-4 sm:px-5 shadow-lg shadow-black/20">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2.5 text-base font-bold text-white group">
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3">
+          <svg class="h-4.5 w-4.5 text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <span class="tracking-tight">Hilmall<span class="text-accent">.cloud</span></span>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <div class="hidden md:flex md:items-center md:gap-1">
+        {navItems.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'relative rounded-lg px-3.5 py-2 text-sm font-medium transition-colors duration-200',
+              currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href))
+                ? 'text-white'
+                : 'text-gray-400 hover:text-white',
+            ]}
+          >
+            {item.label}
+            {(currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href))) && (
+              <span class="absolute inset-x-3 -bottom-px h-px bg-gradient-to-r from-primary to-accent"></span>
+            )}
+          </a>
+        ))}
       </div>
-      <span class="hidden sm:inline">Hilmall<span class="text-accent">.cloud</span></span>
-      <span class="sm:hidden">Hilmall</span>
-    </a>
 
-    <!-- Desktop Navigation -->
-    <div class="hidden md:flex md:items-center md:gap-1">
-      {navItems.map((item) => (
-        <a
-          href={item.href}
-          class:list={[
-            'rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-            currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href))
-              ? 'bg-primary/10 text-primary'
-              : 'text-gray-300 hover:bg-white/5 hover:text-white',
-          ]}
-        >
-          {item.label}
-        </a>
-      ))}
-    </div>
+      <!-- Mobile menu button -->
+      <button
+        type="button"
+        class="inline-flex items-center justify-center rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-white md:hidden transition-colors"
+        id="mobile-menu-button"
+        aria-expanded="false"
+        aria-label="Toggle navigation menu"
+      >
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" id="menu-open-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+        <svg class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" id="menu-close-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </nav>
 
-    <!-- Mobile menu button -->
-    <button
-      type="button"
-      class="inline-flex items-center justify-center rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-white md:hidden"
-      id="mobile-menu-button"
-      aria-expanded="false"
-    >
-      <span class="sr-only">Open main menu</span>
-      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-      </svg>
-    </button>
-  </nav>
-
-  <!-- Mobile menu -->
-  <div class="hidden md:hidden" id="mobile-menu">
-    <div class="space-y-1 px-4 pb-3 pt-2">
-      {navItems.map((item) => (
-        <a
-          href={item.href}
-          class:list={[
-            'block rounded-lg px-3 py-2 text-base font-medium',
-            currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href))
-              ? 'bg-primary/10 text-primary'
-              : 'text-gray-300 hover:bg-white/5 hover:text-white',
-          ]}
-        >
-          {item.label}
-        </a>
-      ))}
+    <!-- Mobile menu -->
+    <div class="hidden md:hidden mt-2 rounded-2xl glass-strong overflow-hidden" id="mobile-menu">
+      <div class="space-y-1 px-3 py-3">
+        {navItems.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'block rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
+              currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href))
+                ? 'bg-primary/15 text-white'
+                : 'text-gray-400 hover:bg-white/5 hover:text-white',
+            ]}
+          >
+            {item.label}
+          </a>
+        ))}
+      </div>
     </div>
   </div>
 </header>
 
+<!-- Spacer for fixed header -->
+<div class="h-20"></div>
+
 <script>
   const button = document.getElementById('mobile-menu-button');
   const menu = document.getElementById('mobile-menu');
+  const openIcon = document.getElementById('menu-open-icon');
+  const closeIcon = document.getElementById('menu-close-icon');
+
   button?.addEventListener('click', () => {
     const expanded = button.getAttribute('aria-expanded') === 'true';
     button.setAttribute('aria-expanded', String(!expanded));
     menu?.classList.toggle('hidden');
+    openIcon?.classList.toggle('hidden');
+    closeIcon?.classList.toggle('hidden');
   });
+
+  // Header background on scroll
+  const header = document.getElementById('site-header');
+  let lastScroll = 0;
+  window.addEventListener('scroll', () => {
+    const scroll = window.scrollY;
+    if (scroll > 10) {
+      header?.classList.add('backdrop-blur-xl');
+    } else {
+      header?.classList.remove('backdrop-blur-xl');
+    }
+    lastScroll = scroll;
+  }, { passive: true });
 </script>

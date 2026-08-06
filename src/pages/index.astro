@@ -2,119 +2,208 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import FadeIn from '../components/FadeIn';
+import AnimatedCounter from '../components/AnimatedCounter';
+import HeroBackground from '../components/HeroBackground';
 import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 6);
 
+const totalWords = 12000;
+
 const topics = [
-  { name: 'Blockchain Nodes', icon: '⛓️', description: 'Running validator nodes, RPC endpoints, and consensus infrastructure' },
-  { name: 'Linux VPS', icon: '🐧', description: 'Server administration, hardening, and performance optimization' },
-  { name: 'Docker', icon: '🐳', description: 'Containerization, orchestration, and production deployment' },
-  { name: 'AI Agents', icon: '🤖', description: 'Autonomous agents, LLM integration, and intelligent automation' },
-  { name: 'Bug Bounty', icon: '🐛', description: 'Security research, vulnerability hunting, and responsible disclosure' },
-  { name: 'Rust', icon: '🦀', description: 'Systems programming, memory safety, and high-performance applications' },
-  { name: 'Golang', icon: '🔷', description: 'Concurrent programming, microservices, and cloud-native tools' },
-  { name: 'Cloudflare', icon: '☁️', description: 'CDN, security, edge computing, and network optimization' },
+  { name: 'Blockchain Nodes', icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5', description: 'Validator operations, RPC infrastructure, and consensus-layer engineering' },
+  { name: 'Linux VPS', icon: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2', description: 'Server hardening, performance tuning, and production administration' },
+  { name: 'Docker', icon: 'M20 7h-9M14 17H5m4-10H5m15 10H9m11-6H9', description: 'Container security, image optimization, and orchestration patterns' },
+  { name: 'AI Agents', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', description: 'LLM integration, tool use, and autonomous agent deployment' },
+  { name: 'Bug Bounty', icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', description: 'Vulnerability research, exploitation, and responsible disclosure' },
+  { name: 'Rust', icon: 'M13 10V3L4 14h7v7l9-11h-7z', description: 'Memory-safe systems programming without garbage collection' },
+  { name: 'Golang', icon: 'M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', description: 'Cloud-native microservices and concurrent systems' },
+  { name: 'Cloudflare', icon: 'M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999A5.002 5.002 0 103 15z', description: 'Edge computing, CDN, and network-layer security' },
+];
+
+const stats = [
+  { value: 10, suffix: '+', label: 'In-depth Guides' },
+  { value: 12, suffix: 'K+', label: 'Words of Content' },
+  { value: 8, suffix: '', label: 'Core Topics' },
+  { value: 100, suffix: '%', label: 'Practical & Tested' },
 ];
 ---
 
-<BaseLayout title="Hilmall Cloud" description="Technical insights on AI infrastructure, bug bounty, blockchain, Linux VPS, and modern DevOps. Written by practitioners, for practitioners.">
+<BaseLayout title="Hilmall Cloud" description="Deep technical content on AI infrastructure, bug bounty, blockchain, Linux VPS, and modern DevOps. Written by practitioners, for practitioners.">
   <Header />
-  <main class="flex-1 bg-dark">
-    <!-- Hero Section -->
+  <main class="flex-1">
+    <!-- ===== HERO ===== -->
     <section class="relative overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-dark to-dark"></div>
-      <div class="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
+      <HeroBackground client:load />
+      <div class="relative mx-auto max-w-7xl px-4 pt-28 pb-24 sm:px-6 sm:pt-36 sm:pb-32 lg:px-8">
         <div class="text-center">
-          <h1 class="text-4xl font-bold tracking-tight text-white sm:text-6xl">
-            Deep Technical Content for
-            <span class="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Infrastructure Engineers
-            </span>
-          </h1>
-          <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-300">
-            From blockchain node operations to bug bounty hunting, from Rust systems programming to AI agent deployment. 
-            Real-world guides written by engineers who run production infrastructure.
-          </p>
-          <div class="mt-10 flex items-center justify-center gap-4">
-            <a
-              href="/blog"
-              class="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary-dark transition-colors"
-            >
-              Read the Blog
-            </a>
-            <a
-              href="/resources"
-              class="rounded-lg border border-dark-border px-6 py-3 text-sm font-semibold text-white hover:bg-white/5 transition-colors"
-            >
-              View Resources
+          <FadeIn client:load>
+            <div class="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs font-medium text-gray-300 mb-8">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+              </span>
+              Infrastructure · Security · AI
+            </div>
+          </FadeIn>
+
+          <FadeIn client:load delay={0.1}>
+            <h1 class="text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl leading-[1.05]">
+              Engineering depth for
+              <br />
+              <span class="text-gradient">modern infrastructure</span>
+            </h1>
+          </FadeIn>
+
+          <FadeIn client:load delay={0.2}>
+            <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-300 leading-relaxed">
+              From blockchain validators to bug bounty, from Rust systems to AI agents.
+              Real-world production guides written by engineers who run the infrastructure they document.
+            </p>
+          </FadeIn>
+
+          <FadeIn client:load delay={0.3}>
+            <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a
+                href="/blog"
+                class="group relative inline-flex items-center gap-2 rounded-xl bg-primary-dark px-7 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-primary hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5"
+              >
+                Read the Guides
+                <svg class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </a>
+              <a
+                href="/resources"
+                class="inline-flex items-center gap-2 rounded-xl glass px-7 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/10 hover:-translate-y-0.5"
+              >
+                Explore Resources
+              </a>
+            </div>
+          </FadeIn>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== STATS ===== -->
+    <section class="relative border-y border-dark-border bg-dark-soft/50">
+      <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 gap-8 lg:grid-cols-4">
+          {stats.map((stat, i) => (
+            <FadeIn client:visible delay={i * 0.1} className="text-center">
+              <div class="text-4xl font-bold text-gradient sm:text-5xl">
+                <AnimatedCounter client:visible end={stat.value} suffix={stat.suffix} />
+              </div>
+              <p class="mt-2 text-sm text-gray-400">{stat.label}</p>
+            </FadeIn>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TOPICS ===== -->
+    <section class="relative">
+      <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <FadeIn client:visible>
+          <div class="mb-12 max-w-xl">
+            <p class="text-sm font-semibold uppercase tracking-widest text-accent mb-3">Coverage</p>
+            <h2 class="text-3xl font-bold text-white sm:text-4xl tracking-tight">What we write about</h2>
+            <p class="mt-3 text-gray-400">Eight core domains, all documented from hands-on production experience.</p>
+          </div>
+        </FadeIn>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {topics.map((topic, i) => (
+            <FadeIn client:visible delay={(i % 4) * 0.08}>
+              <div class="glow-card group rounded-2xl border border-dark-border bg-dark-card p-6 h-full">
+                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 text-accent mb-4 transition-transform duration-300 group-hover:scale-110">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d={topic.icon} />
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-white mb-1.5">{topic.name}</h3>
+                <p class="text-sm text-gray-400 leading-relaxed">{topic.description}</p>
+              </div>
+            </FadeIn>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== LATEST POSTS ===== -->
+    <section class="relative border-t border-dark-border bg-dark-soft/30">
+      <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <FadeIn client:visible>
+          <div class="flex items-end justify-between mb-10">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-widest text-accent mb-3">Latest</p>
+              <h2 class="text-3xl font-bold text-white sm:text-4xl tracking-tight">Recent articles</h2>
+            </div>
+            <a href="/blog" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-primary-light hover:text-accent transition-colors">
+              View all
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
             </a>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Topics Grid -->
-    <section class="border-t border-dark-border bg-dark-card">
-      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-bold text-white mb-8">What We Cover</h2>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {topics.map((topic) => (
-            <div class="rounded-xl border border-dark-border bg-dark p-6 hover:border-primary/50 transition-colors">
-              <div class="text-3xl mb-3">{topic.icon}</div>
-              <h3 class="font-semibold text-white mb-2">{topic.name}</h3>
-              <p class="text-sm text-gray-400">{topic.description}</p>
-            </div>
+        </FadeIn>
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {posts.map((post, i) => (
+            <FadeIn client:visible delay={(i % 3) * 0.08}>
+              <a href={`/blog/${post.id}`} class="block h-full">
+                <article class="glow-card group flex flex-col h-full rounded-2xl border border-dark-border bg-dark-card p-6">
+                  <div class="flex flex-wrap gap-2 mb-4">
+                    {post.data.tags.slice(0, 2).map((tag) => (
+                      <span class="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-xs font-medium text-primary-light">{tag}</span>
+                    ))}
+                  </div>
+                  <h3 class="text-lg font-semibold text-white group-hover:text-accent transition-colors mb-2 leading-snug">
+                    {post.data.title}
+                  </h3>
+                  <p class="text-sm text-gray-500 line-clamp-2 mb-5 flex-1 leading-relaxed">{post.data.description}</p>
+                  <div class="flex items-center justify-between mt-auto pt-4 border-t border-dark-border">
+                    <time class="text-xs text-gray-600" datetime={post.data.pubDate.toISOString()}>
+                      {post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </time>
+                    <span class="inline-flex items-center gap-1 text-xs font-medium text-primary-light opacity-0 group-hover:opacity-100 transition-opacity">
+                      Read
+                      <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </span>
+                  </div>
+                </article>
+              </a>
+            </FadeIn>
           ))}
         </div>
       </div>
     </section>
 
-    <!-- Latest Posts -->
-    <section class="border-t border-dark-border">
-      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl font-bold text-white">Latest Articles</h2>
-          <a href="/blog" class="text-primary hover:text-primary-dark text-sm font-medium">
-            View all →
-          </a>
-        </div>
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
-            <article class="group rounded-xl border border-dark-border bg-dark-card p-6 hover:border-primary/50 transition-colors">
-              <div class="flex flex-wrap gap-2 mb-3">
-                {post.data.tags.slice(0, 3).map((tag) => (
-                  <span class="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{tag}</span>
-                ))}
-              </div>
-              <h3 class="text-lg font-semibold text-white group-hover:text-primary transition-colors mb-2">
-                <a href={`/blog/${post.id}`}>{post.data.title}</a>
-              </h3>
-              <p class="text-sm text-gray-400 line-clamp-2 mb-4">{post.data.description}</p>
-              <time class="text-xs text-gray-500" datetime={post.data.pubDate.toISOString()}>
-                {post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </time>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="border-t border-dark-border bg-gradient-to-r from-primary/10 to-accent/10">
-      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-2xl font-bold text-white mb-4">Powered by Evolution Host</h2>
-        <p class="text-gray-300 mb-6 max-w-2xl mx-auto">
-          Our infrastructure runs on Evolution Host's high-performance VPS. Reliable, affordable, and perfect for blockchain nodes, Docker workloads, and AI applications.
-        </p>
-        <a
-          href="/partners"
-          class="inline-flex items-center gap-2 text-primary hover:text-primary-dark font-medium"
-        >
-          Learn more about our infrastructure →
-        </a>
+    <!-- ===== CTA / PARTNER ===== -->
+    <section class="relative border-t border-dark-border overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none"></div>
+      <div class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <FadeIn client:visible>
+          <div class="glass-strong rounded-3xl p-10 sm:p-14 text-center max-w-3xl mx-auto">
+            <h2 class="text-2xl font-bold text-white sm:text-3xl tracking-tight mb-4">Powered by Evolution Host</h2>
+            <p class="text-gray-400 mb-8 leading-relaxed">
+              Our infrastructure runs on Evolution Host's high-performance VPS. Reliable, affordable,
+              and built for blockchain nodes, Docker workloads, and AI applications.
+            </p>
+            <a
+              href="/partners"
+              class="group inline-flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/10 hover:-translate-y-0.5"
+            >
+              Learn about our infrastructure
+              <svg class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </a>
+          </div>
+        </FadeIn>
       </div>
     </section>
   </main>

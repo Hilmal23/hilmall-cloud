@@ -63,18 +63,50 @@ const resolvedCanonical = canonicalURL || Astro.url.href;
     <meta name="author" content={siteName} />
     <meta name="theme-color" content="#6366f1" />
 
-    <!-- Fonts -->
+    <!-- Fonts (non-blocking) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    />
+    <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
 
     <!-- JSON-LD Schema.org -->
     <slot name="head" />
   </head>
   <body class="min-h-screen flex flex-col">
     <slot />
+    <script>
+      import Lenis from 'lenis';
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!prefersReduced) {
+        const lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+        document.addEventListener('click', (e) => {
+          const t = e.target.closest('a[href^="#"]');
+          if (t) {
+            const id = t.getAttribute('href');
+            if (id && id.length > 1) {
+              const el = document.querySelector(id);
+              if (el) { e.preventDefault(); lenis.scrollTo(el, { offset: -90 }); }
+            }
+          }
+        });
+      }
+    </script>
   </body>
 </html>
